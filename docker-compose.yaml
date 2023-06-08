@@ -8,13 +8,15 @@ services:
     build: ./keycloak-main
     environment:
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://kc-postgres:5432/keycloak #
+      KC_DB_URL: jdbc:postgresql://kc-postgres:5432/keycloak
       KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: changeme
       KC_HOSTNAME: localhost
-      KEYCLOAK_ADMIN: dominic-marvin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_ADMIN: dominic-marvin
+      KC_ADMIN_PASSWORD: admin
       KC_HOSTNAME_STRICT_HTTPS: false 
+    volumes:
+      - ./keycloak-main/data/realms:/opt/keycloak/data/import
     restart: always
     ports:
       - 8080:8080
@@ -45,6 +47,23 @@ services:
       - 8081:8080
     depends_on:
       - db
+
+  # example openLDAP with mockup data
+  ldap1:
+    container_name: open-ldap1
+    image: rroemhild/test-openldap
+    restart: always
+    ports:
+      - 10389:10389
+      - 10636:10636
+
+  ldap2:
+    container_name: open-ldap2
+    image: kazhar/openldap-demo
+    restart: always
+    ports:
+      - 1389:1389
+      - 1636:1636
     
 
   # TODO: webapplication using keycloak to authenticate

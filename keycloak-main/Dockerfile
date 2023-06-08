@@ -19,9 +19,9 @@ RUN /opt/keycloak/bin/kc.sh build
 #######################################
 ### Set configurations for instance ###
 #######################################
-FROM --platform=arm64 quay.io/keycloak/keycloak:latest
+FROM --platform=amd64 quay.io/keycloak/keycloak:latest
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 
-# Default values of the postgres instance that is created in the subfolder ./postgres -> would be overriden in production
+# start the keycloak server in development mode and import all realms that are inside "/opt/keycloak/data/import" <- contents of the "data/realms" folder will be mounted hereö 
 ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
-CMD ["start-dev"]
+CMD ["start-dev", "--import-realm"] 

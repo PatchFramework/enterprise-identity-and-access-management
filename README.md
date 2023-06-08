@@ -2,7 +2,34 @@
 This is a proof of concept to demonstrate how an enterprise identity and access management could be setup. Project by Marvin Welzbacher &amp; Dominic Viola (DHBW CAS)
 
 ## Concepts
-The following concepts must be addressed to understand the whole Enterprise IAM architecture
+The following concepts must be addressed to understand the whole Enterprise IAM architecture.
+
+### 1. LDAP (Lightweight Directory Access Protocol)
+- Opensource protocol based on TCP/IP
+- LDAP protocol can be used to access Directory Service Databases such as Active Directory or OpenLDAP
+
+**LDAP terminology:**
+
+| **Term** | **Meaning**        |
+|----------|--------------------|
+| o        | organization name  |
+| ou       | organization unit  |
+| cn       | common name        |
+| sn       | sur name           |
+| dn       | distinguished name |
+| dc       | domain component   |
+
+**LDAP structure a.k.a. Data Information Tree (DIT):**
+
+![LDAP Structure](images/ldap_structure.png)
+
+---
+## Architecture
+
+![](images/nginx-auth-architecture.png)
+
+---
+
 ## 0 Prerequisits
 1. Docker
 1. Docker Compose
@@ -20,7 +47,7 @@ docker-compose up
 ```
 
 ---
-## 3 Development
+## Development
 Keycloak namespaces its components in Realms. These realms have to be persistet somehow, since containers are ephemeral. 
 However it is possible to export Realms manually and the keycloak container will mount the exports in the "keycloak-main/data/realms" automatically on startup.
 

@@ -1,6 +1,9 @@
 version: '3.9'
 
 services:
+  ######################################
+  ## Main services for enterprise IAM ##
+  ######################################
 
   # keycloak main server
   keycloak:
@@ -21,10 +24,10 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      - db
+      - kc-db
   
   # keycloak persistence layer
-  db:
+  kc-db:
     container_name: kc-postgres
     build: ./postgres
     restart: always
@@ -37,18 +40,8 @@ services:
       - ./postgres/data:/var/lib/postgresql/data
     ports:
       - 5432:5432
-  
-  # direct administration of the database (optional)
-  adminer:
-    container_name: adminer
-    image: adminer
-    restart: always
-    ports:
-      - 8081:8080
-    depends_on:
-      - db
 
-  # example openLDAP with mockup data
+  # example openLDAP with mockup data used for LDAP federation
   ldap1:
     container_name: open-ldap1
     image: rroemhild/test-openldap
@@ -56,7 +49,8 @@ services:
     ports:
       - 10389:10389
       - 10636:10636
-
+  
+  # another example openLDAP with mockup data used for LDAP federation
   ldap2:
     container_name: open-ldap2
     image: kazhar/openldap-demo
@@ -65,5 +59,41 @@ services:
       - 1389:1389
       - 1636:1636
     
+  #########################################################################
+  ## Software Landscape of the organization (having protected resources) ##
+  #########################################################################
+  
+  # reverse proxy that handles authentication
+  nginx:
+    container_name: nginx
+    build: ./nginx
+    ports:
+        - 80:80       # wordpress redirect port
+        - 8881:8881   # adminer redirect port
+    volumes: 
+        - ./nginx/data/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - adminer
+      - jupyter
+      - keycloak
 
-  # TODO: webapplication using keycloak to authenticate
+  # administration of databases for backend developers
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
+
+  # content management system webapplication for frontend developers and marketing people
+  jupyter:
+    container_name: jupyter
+    image: jupyter/datascience-notebook:latest
+    restart: always
+    ports:
+      - 8888:8888
+    environment:
+      JUPYTER_ENABLE_LAB: "yes"
+      JUPYTER_TOKEN: "docker"
+    entrypoint: "start-notebook.sh --NotebookApp.base_url='jupyter' --LabApp.token=''"
+    # set localhost/jupyter as default base_url and disable jupyter authentication since keycloak does this for us
